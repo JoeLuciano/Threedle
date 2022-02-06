@@ -3,16 +3,17 @@ import { useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Html, Text } from '@react-three/drei';
 import WordleRow from './components/WordleRow';
+import _ from 'lodash';
 
 const wordle = 'POINT';
 
 function App() {
   const [allowInput, setAllowInput] = useState(true);
   const [currentGuess, setCurrentGuess] = useState('');
-  const [guesses, setGuesses] = useState(Array(6).fill(''));
   const [matchingLetters, setMatchingLetters] = useState(Array(5).fill(''));
+  const [guessCount, setGuessCount] = useState(0);
+  const [guesses, setGuesses] = useState();
   const [topRowY, setTopRowY] = useState(0);
-  const [wordleRows, setWordleRows] = useState();
 
   function delay(time) {
     return new Promise((resolve) => setTimeout(resolve, time));
@@ -36,7 +37,7 @@ function App() {
   async function handleSubmit() {
     for (const index in currentGuess) {
       const letter = currentGuess[index];
-      await delay(200);
+      await delay(100);
       setMatchingLetters((prev) => {
         let currentResult = '';
         const start = prev.slice(0, index);
@@ -51,36 +52,59 @@ function App() {
         return [...start, currentResult, ...end];
       });
     }
-    setPrevRow(
-      <WordleRow
-        key='second'
-        positionY={1}
-        currentGuess={{ ...currentGuess }}
-        matchingLetters={{ ...matchingLetters }}
-      />
-    );
-    setTopRowY((prev) => prev + 1);
+
+    setTopRowY((prev) => prev + 1.1);
+    setGuessCount((prev) => prev + 1);
+
+    await delay(1000);
+
+    await delay(3000);
   }
 
-  const activeRow = (
-    <WordleRow
-      key='first'
-      positionY={0}
-      currentGuess={currentGuess}
-      matchingLetters={matchingLetters}
-    />
-  );
+  useEffect(() => {
+    setGuesses((prev) => {
+      if (prev && prev.hasOwnProperty(guessCount)) {
+        return {
+          ...prev,
+          [guessCount]: (
+            <WordleRow
+              key={guessCount}
+              positionY={topRowY - guessCount * 1.1}
+              currentGuess={currentGuess}
+              matchingLetters={matchingLetters}
+            />
+          ),
+        };
+      } else {
+        setCurrentGuess('');
+        setMatchingLetters(Array(5).fill(''));
+        return {
+          ...prev,
+          [guessCount]: (
+            <WordleRow
+              key={guessCount}
+              positionY={0}
+              currentGuess={[]}
+              matchingLetters={[]}
+            />
+          ),
+        };
+      }
+    });
+  }, [topRowY, guessCount, currentGuess, matchingLetters]);
 
-  const [prevRow, setPrevRow] = useState();
-  const [showActiveRow, setShowActiveRow] = useState(true);
+  console.log(guesses);
 
   return (
     <Canvas camera={{ position: [0, 0, 5] }}>
       <ambientLight intensity={1} />
       <pointLight position={[10, 10, 10]} />
-      {prevRow}
-      {activeRow}
-
+      {guesses && guesses[5]}
+      {guesses && guesses[4]}
+      {guesses && guesses[3]}
+      {guesses && guesses[2]}
+      {guesses && guesses[1]}
+      {guesses && guesses[0]}
       <Html position={[-0.3, -1, 0]}>
         <input
           type='text'
@@ -90,7 +114,8 @@ function App() {
           placeholder='input'
           onChange={handleChange}
         />
-        <button onClick={handleSubmit}>Submit</button>
+        <button onClick={handleSubmit}>Submit</button>{' '}
+        {/** TODO: Disable submit button after pressing it */}
       </Html>
       <OrbitControls />
     </Canvas>
