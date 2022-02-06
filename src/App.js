@@ -1,5 +1,5 @@
 import './App.css';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Html, Text } from '@react-three/drei';
 import WordleRow from './components/WordleRow';
@@ -13,7 +13,6 @@ function App() {
   const [matchingLetters, setMatchingLetters] = useState(Array(5).fill(''));
   const [guessCount, setGuessCount] = useState(0);
   const [guesses, setGuesses] = useState();
-  const [topRowY, setTopRowY] = useState(0);
 
   function delay(time) {
     return new Promise((resolve) => setTimeout(resolve, time));
@@ -37,7 +36,7 @@ function App() {
   async function handleSubmit() {
     for (const index in currentGuess) {
       const letter = currentGuess[index];
-      await delay(100);
+      await delay(300);
       setMatchingLetters((prev) => {
         let currentResult = '';
         const start = prev.slice(0, index);
@@ -52,13 +51,8 @@ function App() {
         return [...start, currentResult, ...end];
       });
     }
-
-    setTopRowY((prev) => prev + 1.1);
-    setGuessCount((prev) => prev + 1);
-
     await delay(1000);
-
-    await delay(3000);
+    setGuessCount((prev) => prev + 1);
   }
 
   useEffect(() => {
@@ -69,7 +63,7 @@ function App() {
           [guessCount]: (
             <WordleRow
               key={guessCount}
-              positionY={topRowY - guessCount * 1.1}
+              positionY={0}
               currentGuess={currentGuess}
               matchingLetters={matchingLetters}
             />
@@ -78,8 +72,20 @@ function App() {
       } else {
         setCurrentGuess('');
         setMatchingLetters(Array(5).fill(''));
+
+        let shiftedRows = [];
+        if (prev) {
+          for (const rowNum in prev) {
+            const row = prev[rowNum];
+            const shiftedRow = React.cloneElement(row, {
+              positionY: row.props.positionY + 1.1,
+            });
+            shiftedRows.push(shiftedRow);
+          }
+        }
+
         return {
-          ...prev,
+          ...shiftedRows,
           [guessCount]: (
             <WordleRow
               key={guessCount}
@@ -91,20 +97,13 @@ function App() {
         };
       }
     });
-  }, [topRowY, guessCount, currentGuess, matchingLetters]);
-
-  console.log(guesses);
+  }, [guessCount, currentGuess, matchingLetters]);
 
   return (
     <Canvas camera={{ position: [0, 0, 5] }}>
       <ambientLight intensity={1} />
       <pointLight position={[10, 10, 10]} />
-      {guesses && guesses[5]}
-      {guesses && guesses[4]}
-      {guesses && guesses[3]}
-      {guesses && guesses[2]}
-      {guesses && guesses[1]}
-      {guesses && guesses[0]}
+      {guesses && Object.values(guesses)}
       <Html position={[-0.3, -1, 0]}>
         <input
           type='text'
