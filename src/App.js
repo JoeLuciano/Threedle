@@ -1,39 +1,41 @@
 import './App.css';
 import React, { useState, useEffect } from 'react';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Html, Text } from '@react-three/drei';
+import { Canvas, Camera } from '@react-three/fiber';
+import { OrbitControls } from '@react-three/drei';
 import WordleRow from './components/WordleRow';
-import _ from 'lodash';
 
 const wordle = 'POINT';
 
 function App() {
-  const [allowInput, setAllowInput] = useState(true);
+  const [allowSubmit, setAllowSubmit] = useState(false);
   const [currentGuess, setCurrentGuess] = useState('');
   const [matchingLetters, setMatchingLetters] = useState(Array(5).fill(''));
   const [guessCount, setGuessCount] = useState(0);
   const [guesses, setGuesses] = useState();
+
+  const fontSize = 0.5;
+
+  document.onkeydown = handleChange;
 
   function delay(time) {
     return new Promise((resolve) => setTimeout(resolve, time));
   }
 
   async function handleChange(event) {
-    if (
-      allowInput &&
-      event.target.value.length <= 5 &&
-      currentGuess.slice(0, event.target.value.length - 1) ===
-        event.target.value.slice(0, event.target.value.length - 1)
-    ) {
-      const alpha_chars_only = event.target.value.replace(/[^a-zA-Z]/gi, '');
-      setAllowInput(false);
-      setCurrentGuess(alpha_chars_only.toUpperCase());
+    console.log(event.key);
+    if (currentGuess.length < 5 && String(event.key).length === 1) {
+      const alpha_chars_only = event.key.replace(/[^a-zA-Z]/gi, '');
+      setCurrentGuess((prev) => prev.concat(alpha_chars_only.toUpperCase()));
       await delay(200);
-      setAllowInput(true);
+    } else if (event.key === 'Backspace') {
+      setCurrentGuess((prev) => prev.slice(0, -1));
+    } else if (event.key === 'Enter') {
+      allowSubmit && handleSubmit();
     }
   }
 
   async function handleSubmit() {
+    setAllowSubmit(false);
     for (const index in currentGuess) {
       const letter = currentGuess[index];
       await delay(300);
@@ -66,6 +68,7 @@ function App() {
               positionY={0}
               currentGuess={currentGuess}
               matchingLetters={matchingLetters}
+              fontSize={fontSize}
             />
           ),
         };
@@ -78,7 +81,7 @@ function App() {
           for (const rowNum in prev) {
             const row = prev[rowNum];
             const shiftedRow = React.cloneElement(row, {
-              positionY: row.props.positionY + 1.1,
+              positionY: row.props.positionY + fontSize * 1.2,
             });
             shiftedRows.push(shiftedRow);
           }
@@ -92,6 +95,7 @@ function App() {
               positionY={0}
               currentGuess={[]}
               matchingLetters={[]}
+              fontSize={fontSize}
             />
           ),
         };
@@ -99,23 +103,19 @@ function App() {
     });
   }, [guessCount, currentGuess, matchingLetters]);
 
+  useEffect(() => {
+    if (currentGuess.length === 5) {
+      setAllowSubmit(true);
+    } else {
+      setAllowSubmit(false);
+    }
+  }, [currentGuess]);
+
   return (
-    <Canvas camera={{ position: [0, 0, 5] }}>
+    <Canvas camera={{ position: [0, 1, 3] }}>
       <ambientLight intensity={1} />
       <pointLight position={[10, 10, 10]} />
       {guesses && Object.values(guesses)}
-      <Html position={[-0.3, -1, 0]}>
-        <input
-          type='text'
-          name='textBox'
-          value={currentGuess}
-          style={{ width: '5rem' }}
-          placeholder='input'
-          onChange={handleChange}
-        />
-        <button onClick={handleSubmit}>Submit</button>{' '}
-        {/** TODO: Disable submit button after pressing it */}
-      </Html>
       <OrbitControls />
     </Canvas>
   );

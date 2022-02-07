@@ -4,33 +4,45 @@ export default function WordleRow({
   positionY,
   currentGuess,
   matchingLetters,
+  fontSize,
 }) {
+  const leftMost = -(2.4 * fontSize);
+  const left = -(1.2 * fontSize);
+  const middle = 0 * fontSize;
+  const right = 1.2 * fontSize;
+  const rightMost = 2.4 * fontSize;
+
   return (
     <>
       <WordleBox
-        positionVals={[-2.4, positionY, 0]}
-        text={currentGuess[0]}
+        positionVals={[leftMost, positionY, 0]}
+        letter={currentGuess[0]}
         match={matchingLetters[0]}
+        fontSize={fontSize}
       />
       <WordleBox
-        positionVals={[-1.2, positionY, 0]}
-        text={currentGuess[1]}
+        positionVals={[left, positionY, 0]}
+        letter={currentGuess[1]}
         match={matchingLetters[1]}
+        fontSize={fontSize}
       />
       <WordleBox
-        positionVals={[0, positionY, 0]}
-        text={currentGuess[2]}
+        positionVals={[middle, positionY, 0]}
+        letter={currentGuess[2]}
         match={matchingLetters[2]}
+        fontSize={fontSize}
       />
       <WordleBox
-        positionVals={[1.2, positionY, 0]}
-        text={currentGuess[3]}
+        positionVals={[right, positionY, 0]}
+        letter={currentGuess[3]}
         match={matchingLetters[3]}
+        fontSize={fontSize}
       />
       <WordleBox
-        positionVals={[2.4, positionY, 0]}
-        text={currentGuess[4]}
+        positionVals={[rightMost, positionY, 0]}
+        letter={currentGuess[4]}
         match={matchingLetters[4]}
+        fontSize={fontSize}
       />
     </>
   );

@@ -4,7 +4,7 @@ import { Text } from '@react-three/drei';
 import { useSpring, a } from '@react-spring/three';
 import { Vector3 } from 'three';
 
-export default function WordleBox(props) {
+export default function WordleBox({ positionVals, letter, match, fontSize }) {
   const mesh = useRef();
 
   const rightFaceRef = useRef();
@@ -36,34 +36,34 @@ export default function WordleBox(props) {
   // Orient faces so text to display
   useEffect(() => {
     rightFaceRef.current.rotation.y = Math.PI / 2;
-    rightFaceRef.current.position.x = 0.51;
+    rightFaceRef.current.position.x = fontSize / 2 + 0.01;
     leftFaceRef.current.rotation.y = -Math.PI / 2;
-    leftFaceRef.current.position.x = -0.51;
+    leftFaceRef.current.position.x = -(fontSize / 2 + 0.01);
 
     topFaceRef.current.rotation.x = -Math.PI / 2;
-    topFaceRef.current.position.y = 0.51;
+    topFaceRef.current.position.y = fontSize / 2 + 0.01;
     bottomFaceRef.current.rotation.x = Math.PI / 2;
-    bottomFaceRef.current.position.y = -0.51;
+    bottomFaceRef.current.position.y = -(fontSize / 2 + 0.01);
 
-    frontFaceRef.current.position.z = 0.51;
+    frontFaceRef.current.position.z = fontSize / 2 + 0.01;
     backFaceRef.current.rotation.y = Math.PI;
-    backFaceRef.current.position.z = -0.51;
+    backFaceRef.current.position.z = -(fontSize / 2 + 0.01);
   }, [mesh]);
 
   useEffect(() => {
-    if (props.text) {
+    if (letter) {
       setAngleY((current) => current + Math.PI / 2);
       setCurrentFace((cur) => {
         return cur > 2 ? (cur = 0) : (cur += 1);
       });
       if (currentFace === 0) {
-        setLeftFaceText(props.text);
+        setLeftFaceText(letter);
       } else if (currentFace === 1) {
-        setBackFaceText(props.text);
+        setBackFaceText(letter);
       } else if (currentFace === 2) {
-        setRightFaceText(props.text);
+        setRightFaceText(letter);
       } else {
-        setFrontFaceText(props.text);
+        setFrontFaceText(letter);
       }
     } else {
       setAngleY((current) => current - Math.PI / 2);
@@ -71,32 +71,28 @@ export default function WordleBox(props) {
         return cur < 1 ? (cur = 0) : (cur -= 1);
       });
     }
-  }, [props.text]); // Need to figure out how to hold state of current face within this use effect
+  }, [letter]); // Need to figure out how to hold state of current face within this use effect
 
   useEffect(() => {
-    if (props.match === 'match') {
+    if (match === 'match') {
       setAngleX((current) => current + Math.PI / 2);
       topFaceRef.current.rotation.z = currentFace * (-Math.PI / 2);
-      setTopFaceText(props.text);
+      setTopFaceText(letter);
       setTopFaceColor('green');
-    } else if (props.match === 'close') {
+    } else if (match === 'close') {
       setAngleX((current) => current + Math.PI / 2);
       topFaceRef.current.rotation.z = currentFace * (-Math.PI / 2);
-      setTopFaceText(props.text);
+      setTopFaceText(letter);
       setTopFaceColor('yellow');
-    } else if (props.match === 'miss') {
+    } else if (match === 'miss') {
       setAngleX((current) => current + Math.PI / 2);
       topFaceRef.current.rotation.z = currentFace * (-Math.PI / 2);
-      setTopFaceText(props.text);
+      setTopFaceText(letter);
       setTopFaceColor('red');
     }
-  }, [props.match, props.text]);
+  }, [match, letter]);
 
-  const vec = new Vector3(
-    props.positionVals[0],
-    props.positionVals[1],
-    props.positionVals[2]
-  );
+  const vec = new Vector3(positionVals[0], positionVals[1], positionVals[2]);
   useFrame(() => mesh.current.position.lerp(vec, 0.01));
 
   const { rotationX } = useSpring({
@@ -110,16 +106,11 @@ export default function WordleBox(props) {
   });
 
   const fontColor = '#EC2D2D';
-  const fontSize = 1;
 
   return (
     <>
-      <a.mesh
-        {...props}
-        ref={mesh}
-        rotation-x={rotationX}
-        rotation-y={rotationY}>
-        <boxBufferGeometry args={[1, 1, 1]} />
+      <a.mesh ref={mesh} rotation-x={rotationX} rotation-y={rotationY}>
+        <boxBufferGeometry args={[fontSize, fontSize, fontSize]} />
         {/* Order of meshStandardMaterials matters  */}
         <meshStandardMaterial attachArray='material' color={rightFaceColor} />
         <meshStandardMaterial attachArray='material' color={leftFaceColor} />
