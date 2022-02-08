@@ -1,8 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
-import { useFrame } from '@react-three/fiber';
 import { Text } from '@react-three/drei';
 import { useSpring, a } from '@react-spring/three';
-import { Vector3 } from 'three';
 
 export default function WordleBox({ positionVals, letter, match, fontSize }) {
   const mesh = useRef();
@@ -92,9 +90,6 @@ export default function WordleBox({ positionVals, letter, match, fontSize }) {
     }
   }, [match, letter]);
 
-  const vec = new Vector3(positionVals[0], positionVals[1], positionVals[2]);
-  useFrame(() => mesh.current.position.lerp(vec, 0.01));
-
   const { rotationX } = useSpring({
     rotationX: angleX,
     config: { duration: 500 },
@@ -109,7 +104,11 @@ export default function WordleBox({ positionVals, letter, match, fontSize }) {
 
   return (
     <>
-      <a.mesh ref={mesh} rotation-x={rotationX} rotation-y={rotationY}>
+      <a.mesh
+        ref={mesh}
+        rotation-x={rotationX}
+        rotation-y={rotationY}
+        position-x={positionVals[0]}>
         <boxBufferGeometry args={[fontSize, fontSize, fontSize]} />
         {/* Order of meshStandardMaterials matters  */}
         <meshStandardMaterial attachArray='material' color={rightFaceColor} />

@@ -1,12 +1,13 @@
 import './App.css';
 import React, { useState, useEffect } from 'react';
-import { Canvas, Camera } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
+import { Vector3 } from 'three';
 import WordleRow from './components/WordleRow';
 
 const wordle = 'POINT';
 
-function App() {
+export const App = () => {
   const [allowSubmit, setAllowSubmit] = useState(false);
   const [currentGuess, setCurrentGuess] = useState('');
   const [matchingLetters, setMatchingLetters] = useState(Array(5).fill(''));
@@ -22,7 +23,6 @@ function App() {
   }
 
   async function handleChange(event) {
-    console.log(event.key);
     if (currentGuess.length < 5 && String(event.key).length === 1) {
       const alpha_chars_only = event.key.replace(/[^a-zA-Z]/gi, '');
       setCurrentGuess((prev) => prev.concat(alpha_chars_only.toUpperCase()));
@@ -111,14 +111,23 @@ function App() {
     }
   }, [currentGuess]);
 
+  const cameraPosition = new Vector3(0, 0, 3);
+  const lookAtPos = new Vector3(0, 1, 0);
+
+  const CameraAdjustment = () => {
+    useFrame((state, delta) => {
+      state.camera.lookAt(lookAtPos);
+    });
+    return <></>;
+  };
+
   return (
-    <Canvas camera={{ position: [0, 1, 3] }}>
+    <Canvas camera={{ position: cameraPosition }}>
       <ambientLight intensity={1} />
       <pointLight position={[10, 10, 10]} />
       {guesses && Object.values(guesses)}
       <OrbitControls />
+      <CameraAdjustment />
     </Canvas>
   );
-}
-
-export default App;
+};
