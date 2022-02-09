@@ -15,6 +15,7 @@ export default function WordleRow({
   const middle = 0 * fontSize;
   const right = 1.2 * fontSize;
   const rightMost = 2.4 * fontSize;
+
   const { scale } = useSpring({
     delay: 1000,
     scale: boxScale,
@@ -32,31 +33,31 @@ export default function WordleRow({
   return (
     <a.group rotation={[0, 0, 0]} scale={scale} position={position}>
       <WordleBox
-        positionVals={[leftMost, 0, 0]}
+        posX={leftMost}
         letter={currentGuess[0]}
         match={matchingLetters[0]}
         fontSize={fontSize}
       />
       <WordleBox
-        positionVals={[left, 0, 0]}
+        posX={left}
         letter={currentGuess[1]}
         match={matchingLetters[1]}
         fontSize={fontSize}
       />
       <WordleBox
-        positionVals={[middle, 0, 0]}
+        posX={middle}
         letter={currentGuess[2]}
         match={matchingLetters[2]}
         fontSize={fontSize}
       />
       <WordleBox
-        positionVals={[right, 0, 0]}
+        posX={right}
         letter={currentGuess[3]}
         match={matchingLetters[3]}
         fontSize={fontSize}
       />
       <WordleBox
-        positionVals={[rightMost, 0, 0]}
+        posX={rightMost}
         letter={currentGuess[4]}
         match={matchingLetters[4]}
         fontSize={fontSize}
