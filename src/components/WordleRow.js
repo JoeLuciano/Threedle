@@ -16,19 +16,20 @@ export default function WordleRow({
   const right = 1.2 * fontSize;
   const rightMost = 2.4 * fontSize;
 
+  useEffect(() => {
+    setBoxScale(1);
+  }, []);
+
   const { scale } = useSpring({
-    delay: 1000,
+    delay: 1100,
     scale: boxScale,
-    config: { duration: 1000 },
+    config: { duration: 500 },
   });
 
   const { position } = useSpring({
     position: [0, positionY, 0],
-    config: { duration: 1000 },
+    config: { duration: 500 },
   });
-  useEffect(() => {
-    setBoxScale(1);
-  }, []);
 
   return (
     <a.group rotation={[0, 0, 0]} scale={scale} position={position}>

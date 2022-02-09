@@ -22,11 +22,18 @@ export const App = () => {
     return new Promise((resolve) => setTimeout(resolve, time));
   }
 
-  async function handleChange(event) {
+  useEffect(() => {
+    if (currentGuess.length === 5) {
+      setAllowSubmit(true);
+    } else {
+      setAllowSubmit(false);
+    }
+  }, [currentGuess]);
+
+  function handleChange(event) {
     if (currentGuess.length < 5 && String(event.key).length === 1) {
       const alpha_chars_only = event.key.replace(/[^a-zA-Z]/gi, '');
       setCurrentGuess((prev) => prev.concat(alpha_chars_only.toUpperCase()));
-      await delay(200);
     } else if (event.key === 'Backspace') {
       setCurrentGuess((prev) => prev.slice(0, -1));
     } else if (event.key === 'Enter') {
@@ -37,8 +44,8 @@ export const App = () => {
   async function handleSubmit() {
     setAllowSubmit(false);
     for (const index in currentGuess) {
-      const letter = currentGuess[index];
       await delay(300);
+      const letter = currentGuess[index];
       setMatchingLetters((prev) => {
         let currentResult = '';
         const start = prev.slice(0, index);
@@ -57,59 +64,55 @@ export const App = () => {
     setGuessCount((prev) => prev + 1);
   }
 
+  // UPDATE CURRENT GUESS
   useEffect(() => {
     setGuesses((prev) => {
-      if (prev && prev.hasOwnProperty(guessCount)) {
-        return {
-          ...prev,
-          [guessCount]: (
-            <WordleRow
-              key={guessCount}
-              positionY={0}
-              currentGuess={currentGuess}
-              matchingLetters={matchingLetters}
-              fontSize={fontSize}
-            />
-          ),
-        };
-      } else {
-        setCurrentGuess('');
-        setMatchingLetters(Array(5).fill(''));
-
-        let shiftedRows = [];
-        if (prev) {
-          for (const rowNum in prev) {
-            const row = prev[rowNum];
-            const shiftedRow = React.cloneElement(row, {
-              positionY: row.props.positionY + fontSize * 1.2,
-            });
-            shiftedRows.push(shiftedRow);
-          }
-        }
-
-        return {
-          ...shiftedRows,
-          [guessCount]: (
-            <WordleRow
-              key={guessCount}
-              positionY={0}
-              currentGuess={[]}
-              matchingLetters={[]}
-              fontSize={fontSize}
-            />
-          ),
-        };
-      }
+      return {
+        ...prev,
+        [guessCount]: (
+          <WordleRow
+            key={guessCount}
+            positionY={0}
+            currentGuess={currentGuess}
+            matchingLetters={matchingLetters}
+            fontSize={fontSize}
+          />
+        ),
+      };
     });
-  }, [guessCount, currentGuess, matchingLetters]);
+  }, [currentGuess, guessCount, matchingLetters]);
 
+  // ADD NEW ROW
   useEffect(() => {
-    if (currentGuess.length === 5) {
-      setAllowSubmit(true);
-    } else {
-      setAllowSubmit(false);
-    }
-  }, [currentGuess]);
+    setGuesses((prev) => {
+      setCurrentGuess('');
+      setMatchingLetters(Array(5).fill(''));
+
+      let shiftedRows = [];
+      if (prev) {
+        for (const rowNum in prev) {
+          const row = prev[rowNum];
+          const shiftedRow = React.cloneElement(row, {
+            positionY: row.props.positionY + fontSize * 1.2,
+          });
+          shiftedRows.push(shiftedRow);
+        }
+      }
+
+      return {
+        ...shiftedRows,
+        [guessCount]: (
+          <WordleRow
+            key={guessCount}
+            positionY={0}
+            currentGuess={[]}
+            matchingLetters={[]}
+            fontSize={fontSize}
+          />
+        ),
+      };
+    });
+  }, [guessCount]);
 
   const cameraPosition = new Vector3(0, 0, 3);
   const lookAtPos = new Vector3(0, 1, 0);
