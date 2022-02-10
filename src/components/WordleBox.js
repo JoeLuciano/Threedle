@@ -63,7 +63,7 @@ export default function WordleBox({ posX, letter, match, fontSize }) {
   }, [posX]);
 
   const { positionX } = useSpring({
-    delay: 2000,
+    delay: 1500,
     positionX: delayedPosX,
     config: { duration: 500 },
   });

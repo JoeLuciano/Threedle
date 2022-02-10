@@ -4,23 +4,33 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import { Vector3 } from 'three';
 import WordleRow from './components/WordleRow';
+import Keyboard from 'react-simple-keyboard';
 
 const wordle = 'POINT';
 
 export const App = () => {
+  const [guesses, setGuesses] = useState();
+  const [allowInput, setAllowInput] = useState(false);
   const [allowSubmit, setAllowSubmit] = useState(false);
   const [currentGuess, setCurrentGuess] = useState('');
-  const [matchingLetters, setMatchingLetters] = useState(Array(5).fill(''));
+  const [matchingLetters, setMatchingLetters] = useState(Array(5).fill('none'));
   const [guessCount, setGuessCount] = useState(0);
-  const [guesses, setGuesses] = useState();
 
   const fontSize = 0.5;
 
-  document.onkeydown = handleChange;
+  document.onkeydown = handleKeyboardChange;
 
   function delay(time) {
     return new Promise((resolve) => setTimeout(resolve, time));
   }
+
+  useEffect(() => {
+    async function delayStart() {
+      await delay(2400);
+      setAllowInput(true);
+    }
+    delayStart();
+  }, []);
 
   useEffect(() => {
     if (currentGuess.length === 5) {
@@ -30,38 +40,47 @@ export const App = () => {
     }
   }, [currentGuess]);
 
-  function handleChange(event) {
-    if (currentGuess.length < 5 && String(event.key).length === 1) {
-      const alpha_chars_only = event.key.replace(/[^a-zA-Z]/gi, '');
-      setCurrentGuess((prev) => prev.concat(alpha_chars_only.toUpperCase()));
-    } else if (event.key === 'Backspace') {
-      setCurrentGuess((prev) => prev.slice(0, -1));
-    } else if (event.key === 'Enter') {
-      allowSubmit && handleSubmit();
+  async function handleKeyboardChange(event) {
+    if (allowInput) {
+      if (currentGuess.length < 5 && String(event.key).length === 1) {
+        const alpha_chars_only = event.key.replace(/[^a-zA-Z]/gi, '');
+        setCurrentGuess((prev) => prev.concat(alpha_chars_only.toUpperCase()));
+      } else if (event.key === 'Backspace') {
+        setCurrentGuess((prev) => prev.slice(0, -1));
+      } else if (event.key === 'Enter') {
+        allowSubmit && handleSubmit();
+      }
+      setAllowInput(false);
+      await delay(50);
+      setAllowInput(true);
     }
   }
 
   async function handleSubmit() {
-    setAllowSubmit(false);
-    for (const index in currentGuess) {
-      await delay(300);
-      const letter = currentGuess[index];
-      setMatchingLetters((prev) => {
-        let currentResult = '';
-        const start = prev.slice(0, index);
-        const end = prev.slice(index + 1);
-        if (letter === wordle.split('')[index]) {
-          currentResult = 'match';
-        } else if (wordle.includes(letter)) {
-          currentResult = 'close';
-        } else {
-          currentResult = 'miss';
-        }
-        return [...start, currentResult, ...end];
-      });
+    if (allowInput) {
+      setAllowSubmit(false);
+      for (let index in currentGuess) {
+        const letter = currentGuess[index];
+        await delay(300);
+        setMatchingLetters((prev) => {
+          let currentResult = [...prev];
+          if (letter === wordle.split('')[index]) {
+            currentResult.splice(index, 1, 'match');
+          } else if (wordle.includes(letter)) {
+            currentResult.splice(index, 1, 'close');
+          } else {
+            currentResult.splice(index, 1, 'miss');
+          }
+          return currentResult;
+        });
+      }
+      await delay(100); // Need this for matchingLetters to propogate
+      setGuessCount((prev) => prev + 1);
+
+      setAllowInput(false);
+      await delay(2400);
+      setAllowInput(true);
     }
-    await delay(1000);
-    setGuessCount((prev) => prev + 1);
   }
 
   // UPDATE CURRENT GUESS
@@ -86,7 +105,7 @@ export const App = () => {
   useEffect(() => {
     setGuesses((prev) => {
       setCurrentGuess('');
-      setMatchingLetters(Array(5).fill(''));
+      setMatchingLetters(Array(5).fill('none'));
 
       let shiftedRows = [];
       if (prev) {
@@ -114,7 +133,7 @@ export const App = () => {
     });
   }, [guessCount]);
 
-  const cameraPosition = new Vector3(0, 0, 3);
+  const cameraPosition = new Vector3(0, 0, 4);
   const lookAtPos = new Vector3(0, 1, 0);
 
   const CameraAdjustment = () => {
@@ -124,13 +143,44 @@ export const App = () => {
     return <></>;
   };
 
+  async function handleOnScreenKeyboardChange(key) {
+    if (allowInput) {
+      if (currentGuess.length < 5 && String(key).length === 1) {
+        const alpha_chars_only = key.replace(/[^a-zA-Z]/gi, '');
+        setCurrentGuess((prev) => prev.concat(alpha_chars_only.toUpperCase()));
+      } else if (key === '{bksp}') {
+        setCurrentGuess((prev) => prev.slice(0, -1));
+      } else if (key === '{enter}') {
+        allowSubmit && handleSubmit();
+      }
+      // setAllowInput(false);
+      // await delay(50);
+      setAllowInput(true);
+    }
+  }
+
   return (
-    <Canvas camera={{ position: cameraPosition }}>
-      <ambientLight intensity={1} />
-      <pointLight position={[10, 10, 10]} />
-      {guesses && Object.values(guesses)}
-      <OrbitControls />
-      <CameraAdjustment />
-    </Canvas>
+    <>
+      <Canvas camera={{ position: cameraPosition }}>
+        <ambientLight intensity={1} />
+        <pointLight position={[10, 10, 10]} />
+        {guesses && Object.values(guesses)}
+        <OrbitControls />
+        <CameraAdjustment />
+      </Canvas>
+      <div className='keyboard-container'>
+        <Keyboard
+          onKeyPress={handleOnScreenKeyboardChange}
+          display={{ '{bksp}': '⌫', '{enter}': '⏏' }}
+          layout={{
+            default: [
+              'Q W E R T Y U I O P',
+              'A S D F G H J K L',
+              '{enter} Z X C V B N M {bksp}',
+            ],
+          }}
+        />
+      </div>
+    </>
   );
 };

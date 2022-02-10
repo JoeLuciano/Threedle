@@ -7408,6 +7408,11 @@ react-scripts@5.0.0:
   optionalDependencies:
     fsevents "^2.3.2"
 
+react-simple-keyboard@^3.4.57:
+  version "3.4.57"
+  resolved "https://registry.yarnpkg.com/react-simple-keyboard/-/react-simple-keyboard-3.4.57.tgz#1d7f3b1c01708ca0a4a17514a126a9720d3c0b85"
+  integrity sha512-B2oZncTMqH2C0WOMe5EHzTmVkyWPAjCScb3pudePZAc0yTgtQt/HXHpw1pMvx+pgmvCeO//HTo0RWFNhEcmALQ==
+
 react-spring@^9.4.2:
   version "9.4.2"
   resolved "https://registry.yarnpkg.com/react-spring/-/react-spring-9.4.2.tgz#71fcbe2d317fae9271058c8b70823af0c3b8ad4d"

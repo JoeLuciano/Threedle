@@ -10,18 +10,18 @@ export default function WordleRow({
 }) {
   const [boxScale, setBoxScale] = useState(0);
 
-  const leftMost = -(2.4 * fontSize);
-  const left = -(1.2 * fontSize);
+  const leftMost = -(2.6 * fontSize);
+  const left = -(1.3 * fontSize);
   const middle = 0 * fontSize;
-  const right = 1.2 * fontSize;
-  const rightMost = 2.4 * fontSize;
+  const right = 1.3 * fontSize;
+  const rightMost = 2.6 * fontSize;
 
   useEffect(() => {
     setBoxScale(1);
   }, []);
 
   const { scale } = useSpring({
-    delay: 1100,
+    delay: 800,
     scale: boxScale,
     config: { duration: 500 },
   });
