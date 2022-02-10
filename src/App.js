@@ -50,9 +50,6 @@ export const App = () => {
       } else if (event.key === 'Enter') {
         allowSubmit && handleSubmit();
       }
-      setAllowInput(false);
-      await delay(50);
-      setAllowInput(true);
     }
   }
 
@@ -153,9 +150,6 @@ export const App = () => {
       } else if (key === '{enter}') {
         allowSubmit && handleSubmit();
       }
-      // setAllowInput(false);
-      // await delay(50);
-      setAllowInput(true);
     }
   }
 
