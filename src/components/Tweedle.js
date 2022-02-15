@@ -55,6 +55,7 @@ export const Tweedle = ({ wordle }) => {
 
   async function handleSubmit() {
     if (allowInput) {
+      setGameState('playing');
       setAllowSubmit(false);
       const guessSubmission = currentGuess;
       for (let index in currentGuess) {
@@ -72,11 +73,13 @@ export const Tweedle = ({ wordle }) => {
           return currentResult;
         });
       }
-
+      await delay(800);
       setAllowInput(false);
 
       if (guessSubmission === wordle) {
         setGameState('won');
+      } else if (guessCount === 5) {
+        setGameState('lost');
       } else {
         setGuessCount((prev) => prev + 1);
 
